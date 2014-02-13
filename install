@@ -1,0 +1,8 @@
+#!/usr/bin/env ruby
+
+files = Dir['languages/*/Dockerfile']
+
+files.each do |file|
+	language = file.split('/')[1]
+	system("docker build -t ubuntu:#{language} ./languages/#{language}")
+end

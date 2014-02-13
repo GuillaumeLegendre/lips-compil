@@ -1,0 +1,14 @@
+{
+  "languages": {
+    "java": {
+      "extension": "java",
+      "stdin":"echo "
+    },
+    "c": {
+      "extension": "c"
+    },
+    "ruby": {
+      "extension": "rb"
+    }
+  }
+}

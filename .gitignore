@@ -1,6 +1,10 @@
 .bundle
 .DS_Store
 bin/
+tmp/
+test/
+docker/
 *~
 \#*
 .\#*
+Gemfile.lock
