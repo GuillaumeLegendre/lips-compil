@@ -1,3 +1,3 @@
 #!/bin/bash
 
-( ruby ./compil/code/code.rb ) & sleep 5 ; echo "timeout">&2;kill $!
+timeout -k 5 -s 9 5 ruby ./compil/code/code.rb
