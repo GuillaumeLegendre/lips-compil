@@ -8,12 +8,7 @@ set :bind, '0.0.0.0'
 class Sinatra::Application
   set :protection, :except => [:http_origin]
 
-  ### Uncomment if session is required
-  # configure do
-  #   enable :session
-  # end
-
-  get '/available_languages' do
+  get '/languages' do
     languages = JSON.parse(IO.read("config_languages.json"))
 
     array = []
@@ -24,8 +19,8 @@ class Sinatra::Application
     json :languages => array
   end
 
-  post '/compilation' do
-    json = JSON.parse(params[:json])
+  post '/execute' do
+    json = params
     language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
 
     if language.nil?
@@ -46,7 +41,11 @@ class Sinatra::Application
     code.sub!("\[code\]", json["code"].gsub(/['"\\\x0]/,'\\\\\0'))
     system(code)
 
-    cmd = "sudo docker run -i -n=false -m='128m' -rm=true -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
+    if json["name"]
+      cmd = "docker run -i -n=false -m='128m' -rm=true -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
+    else
+      cmd = "docker run -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
+    end
     cmd.gsub!("\[hash\]", id)
 
     if json["name"] && language["stdin"]
@@ -64,12 +63,11 @@ class Sinatra::Application
 
     system("rm -R tmp/#{id}")
     
-
     if exit_status != 0
       # erreur server
     end
 
-    json "test" => {"stdout" => stream_stdout.to_s, "stderr" => stream_stderr.to_s}
+    return {"stdout" => stream_stdout.to_s, "stderr" => stream_stderr.to_s}.to_json
   end
 
   error 404 do
