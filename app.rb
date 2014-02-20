@@ -24,8 +24,7 @@ class Sinatra::Application
     language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
 
     if language.nil?
-      #TODO
-      puts "ERREUR !!! langage pas dans le fichier de config"
+      return {"stdout" => "", "stderr" => "Error :language not available"}.to_json
     end
     id = SecureRandom.uuid
     
@@ -33,24 +32,24 @@ class Sinatra::Application
     
     #TODO verif why 2 times json code
 
-    if json["name"]
-      code = "echo '#{json["code"]}' > tmp/#{id}/#{json["name"]}.#{language["extension"]}"
+    if json["stdin"]
+      code = "echo '#{json["code"]}' > tmp/#{id}/#{json["stdin"]}.#{language["extension"]}"
     else
       code = "echo '#{json["code"]}' > tmp/#{id}/code.#{language["extension"]}"
     end
+
     code.sub!("\[code\]", json["code"].gsub(/['"\\\x0]/,'\\\\\0'))
     system(code)
 
-    if json["name"]
-      cmd = "docker run -i -n=false -m='128m' -rm=true -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
-    else
-      cmd = "docker run -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
-    end
+    cmd = "docker run -i -rm=true -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
     cmd.gsub!("\[hash\]", id)
 
-    if json["name"] && language["stdin"]
-      cmd = language["stdin"] + json["name"] + " | " + cmd
+    if json["stdin"]
+      cmd = "echo " + json["stdin"] + " | " + cmd
+    else 
+      cmd = "echo '' | " + cmd
     end
+    
 
     puts cmd.inspect
 
