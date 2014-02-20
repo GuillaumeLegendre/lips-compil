@@ -2,13 +2,15 @@
   "languages": {
     "java": {
       "extension": "java",
-      "stdin":"echo "
+      "timeout": 5
     },
     "c": {
-      "extension": "c"
+      "extension": "c",
+      "timeout": 5
     },
     "ruby": {
-      "extension": "rb"
+      "extension": "rb",
+      "timeout": 5
     }
   }
 }
