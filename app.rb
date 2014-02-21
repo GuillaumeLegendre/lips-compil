@@ -55,13 +55,17 @@ class Sinatra::Application
 
     stream_stdout, stream_stderr, exit_status = nil
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-      stream_stdout = stdout.read.to_s
-      stream_stderr = stderr.read.to_s
       exit_status = wait_thr.value.exitstatus
+      if(exit_status == 124)
+        stream_stderr = "timeout after #{language["timeout"]}s"
+      else
+        stream_stdout = stdout.read.to_s
+        stream_stderr = stderr.read.to_s
+      end
     end
 
     system("rm -R tmp/#{id}")
-    
+
     if exit_status != 0
       # erreur server
     end
