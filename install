@@ -2,7 +2,12 @@
 
 files = Dir['languages/*/Dockerfile']
 
+languages = ARGV
+
 files.each do |file|
-	language = file.split('/')[1]
-	system("docker build -t ubuntu:#{language} ./languages/#{language}")
+  language = file.split('/')[1]
+  if languages.empty? || languages.include?(language)
+    puts "\n########## Install #{language} ##########\n\n"
+    system("docker build -t ubuntu:#{language} ./languages/#{language}")
+  end
 end

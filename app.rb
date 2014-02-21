@@ -24,7 +24,7 @@ class Sinatra::Application
     language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
 
     if language.nil?
-      return {"stdout" => "", "stderr" => "Error :language not available"}.to_json
+      return {"stdout" => "", "stderr" => "Error: language not available"}.to_json
     end
     id = SecureRandom.uuid
     
@@ -50,14 +50,13 @@ class Sinatra::Application
       cmd = "echo '' | " + cmd
     end
     
-
     puts cmd.inspect
 
     stream_stdout, stream_stderr, exit_status = nil
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
       exit_status = wait_thr.value.exitstatus
       if(exit_status == 124)
-        stream_stderr = "timeout after #{language["timeout"]}s"
+        stream_stderr = "Error: timeout after #{language["timeout"]}s"
       else
         stream_stdout = stdout.read.to_s
         stream_stderr = stderr.read.to_s
