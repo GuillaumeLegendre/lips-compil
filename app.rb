@@ -31,7 +31,7 @@ class Sinatra::Application
     system("mkdir tmp/#{id}")
     
     #TODO verif why 2 times json code
-
+    #TODO remove ce if et suppr particularité de java
     if json["stdin"]
       code = "echo '#{json["code"]}' > tmp/#{id}/#{json["stdin"]}.#{language["extension"]}"
     else
@@ -41,7 +41,7 @@ class Sinatra::Application
     code.sub!("\[code\]", json["code"].gsub(/['"\\\x0]/,'\\\\\0'))
     system(code)
 
-    cmd = "docker run -i -rm=true -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} /root/script.sh"
+    cmd = "docker run -i -rm=true -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
     cmd.gsub!("\[hash\]", id)
 
     if json["stdin"]
