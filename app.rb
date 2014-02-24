@@ -35,7 +35,8 @@ class Sinatra::Application
     
     begin
       FileUtils.mkdir "tmp/#{id}"
-    rescue
+    rescue Exception => e  
+      $stderr.puts e.message
       return {"stdout" => "", "stderr" => "Error: Contact the administrator"}.to_json
     end
 
