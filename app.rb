@@ -27,6 +27,10 @@ class Sinatra::Application
       return {"stdout" => "", "stderr" => "Error: Language and/or code variable missing"}.to_json
     end
 
+    if (json["code"] =~ /\A[a-zA-Z\d\/+]+={,2}\z/).nil?
+      return {"stdout" => "", "stderr" => "Error: Variable code must be encode in base64"}.to_json
+    end
+
     language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
     if language.nil?
       return {"stdout" => "", "stderr" => "Error: language not available"}.to_json
@@ -38,10 +42,6 @@ class Sinatra::Application
     rescue Exception => e  
       $stderr.puts e.message
       return {"stdout" => "", "stderr" => "Error: Contact the administrator"}.to_json
-    end
-
-    unless json["code"] =~ ^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$
-      return {"stdout" => "", "stderr" => "Error: Variable code must be encode in base64"}.to_json
     end
 
     File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"])) }
