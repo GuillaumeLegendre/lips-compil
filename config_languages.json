@@ -2,7 +2,7 @@
   "languages": {
     "java": {
       "extension": "java",
-      "timeout": 5
+      "timeout": 7
     },
     "c": {
       "extension": "c",

@@ -21,8 +21,12 @@ class Sinatra::Application
 
   post '/execute' do
     json = params
-    language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
 
+    if json["language"].nil? || json["code"].nil?
+      return {"stdout" => "", "stderr" => "Error: Language and/or code variable missing"}.to_json
+    end
+
+    language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
     if language.nil?
       return {"stdout" => "", "stderr" => "Error: language not available"}.to_json
     end
@@ -30,26 +34,10 @@ class Sinatra::Application
     
     system("mkdir tmp/#{id}")
     
-    #TODO verif why 2 times json code
-    #TODO remove ce if et suppr particularité de java
-    if json["stdin"]
-      code = "echo '#{json["code"]}' > tmp/#{id}/#{json["stdin"]}.#{language["extension"]}"
-    else
-      code = "echo '#{json["code"]}' > tmp/#{id}/code.#{language["extension"]}"
-    end
-
-    code.sub!("\[code\]", json["code"].gsub(/['"\\\x0]/,'\\\\\0'))
+    code = "echo #{json["code"]} > tmp/#{id}/code.#{language["extension"]}"
     system(code)
 
-    cmd = "docker run -i -rm=true -n=false -m='128m' -v /srv/website/tmp/[hash]:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
-    cmd.gsub!("\[hash\]", id)
-
-    if json["stdin"]
-      cmd = "echo " + json["stdin"] + " | " + cmd
-    else 
-      cmd = "echo '' | " + cmd
-    end
-    
+    cmd = "docker run -rm=true -n=false -m='128m' -v /srv/website/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
     puts cmd.inspect
 
     stream_stdout, stream_stderr, exit_status = nil
@@ -70,9 +58,5 @@ class Sinatra::Application
     end
 
     return {"stdout" => stream_stdout.to_s, "stderr" => stream_stderr.to_s}.to_json
-  end
-
-  error 404 do
-    'Not Found'
   end
 end

@@ -9,5 +9,8 @@ files.each do |file|
   if languages.empty? || languages.include?(language)
     puts "\n########## Install #{language} ##########\n\n"
     system("docker build -t ubuntu:#{language} ./languages/#{language}")
+    if language == "java"
+      system("./fixed_java_install.rb")
+    end
   end
 end

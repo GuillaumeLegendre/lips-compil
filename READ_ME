@@ -1,0 +1,19 @@
+Pré requis avant installation:
+
+installer git lxc curl
+kernel 3.8+
+ubuntu
+archi 64 bits
+
+(Use vagrant si nécessaire voir page d'installation docker)
+
+Vérifier le kernel avec
+lxc-checkconfig
+
+Installer ruby (Si plusieurs version de ruby necessaire utiliser RVM ruby version manager)
+git clone du projet
+cd projet
+bundle install
+install docker
+./install
+ruby app.rb (lancer le serveur)
