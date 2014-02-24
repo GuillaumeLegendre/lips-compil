@@ -40,6 +40,10 @@ class Sinatra::Application
       return {"stdout" => "", "stderr" => "Error: Contact the administrator"}.to_json
     end
 
+    unless json["code"] =~ ^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$
+      return {"stdout" => "", "stderr" => "Error: Variable code must be encode in base64"}.to_json
+    end
+
     File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"])) }
 
     #-rm=true -n=false -m='128m'
