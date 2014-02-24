@@ -1,7 +1,8 @@
 require "sinatra"
 require "sinatra/json"
 require "json"
-require 'open3'
+require "open3"
+require "base64"
 
 set :bind, '0.0.0.0'
 
@@ -32,12 +33,16 @@ class Sinatra::Application
     end
     id = SecureRandom.uuid
     
-    system("mkdir tmp/#{id}")
-    
-    code = "echo #{json["code"]} > tmp/#{id}/code.#{language["extension"]}"
-    system(code)
+    begin
+      FileUtils.mkdir "tmp/#{id}"
+    rescue
+      return {"stdout" => "", "stderr" => "Error: Contact the administrator"}.to_json
+    end
 
-    cmd = "docker run -rm=true -n=false -m='128m' -v /srv/website/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
+    File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"])) }
+
+    #-rm=true -n=false -m='128m'
+    cmd = "docker run -v /srv/website/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
     puts cmd.inspect
 
     stream_stdout, stream_stderr, exit_status = nil
@@ -51,7 +56,7 @@ class Sinatra::Application
       end
     end
 
-    system("rm -R tmp/#{id}")
+    # system("rm -R tmp/#{id}")
 
     if exit_status != 0
       # erreur server
