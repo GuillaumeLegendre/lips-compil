@@ -1,9 +1,6 @@
 FROM ubuntu
-
-RUN sudo apt-get update
-RUN sudo apt-get install -y coreutils
-# openjdk-7-jdk
-
+RUN apt-get update
+RUN apt-get install -y python coreutils
 ADD script.sh /root/script.sh
 ADD timeout.sh /root/timeout.sh
 RUN chmod +x /root/script.sh

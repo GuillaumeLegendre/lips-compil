@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
 require "sinatra"
 require "sinatra/json"
 require "json"
@@ -44,28 +46,22 @@ class Sinatra::Application
       return {"stdout" => "", "stderr" => "Error: Contact the administrator"}.to_json
     end
 
-    File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"])) }
+    File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"]))}
 
-    #-rm=true -n=false -m='128m'
-    cmd = "docker run -v /srv/website/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} timeout -k #{language["timeout"]} -s 9 #{language["timeout"]} /root/script.sh"
-    puts cmd.inspect
+    # pour limiter la taille mémoire d'un conteneur -m='128m' 
+    cmd = "docker run -rm=true -n=false -v /var/www/lips-compil/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} /root/timeout.sh  #{language["timeout"]}"
 
     stream_stdout, stream_stderr, exit_status = nil
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
-      exit_status = wait_thr.value.exitstatus
-      if(exit_status == 124)
+      stream_stderr = stderr.read.to_s
+      if stream_stderr.include? "Killed"
         stream_stderr = "Error: timeout after #{language["timeout"]}s"
       else
         stream_stdout = stdout.read.to_s
-        stream_stderr = stderr.read.to_s
       end
     end
 
-    # system("rm -R tmp/#{id}")
-
-    if exit_status != 0
-      # erreur server
-    end
+    system("rm -R tmp/#{id}")
 
     return {"stdout" => stream_stdout.to_s, "stderr" => stream_stderr.to_s}.to_json
   end

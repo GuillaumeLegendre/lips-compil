@@ -11,6 +11,10 @@
     "ruby": {
       "extension": "rb",
       "timeout": 5
+    },
+    "python": {
+      "extension": "py",
+      "timeout": 5
     }
   }
 }

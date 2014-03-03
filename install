@@ -8,7 +8,13 @@ files.each do |file|
   language = file.split('/')[1]
   if languages.empty? || languages.include?(language)
     puts "\n########## Install #{language} ##########\n\n"
-    system("docker build -t ubuntu:#{language} ./languages/#{language}")
+
+    output = File.open( "languages/#{language}/timeout.sh", "w" )
+	output << "#!/bin/bash\ntimeout -s 9 -k $1 $1 /root/script.sh"
+	output.close
+	puts "Create file timeout.sh"
+
+    system("docker build --no-cache -t ubuntu:#{language} ./languages/#{language}")
     if language == "java"
       system("./fixed_java_install.rb")
     end

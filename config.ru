@@ -1,9 +1,6 @@
-require 'rubygems'
-require 'sinatra'
-require './app'
+# encoding: UTF-8
 
-set :run, false
-set :environment, :production
-set :raise_errors, true
+require 'rubygems'
+require './app.rb'
 
 run Sinatra::Application
