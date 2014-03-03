@@ -11,6 +11,8 @@ set :bind, '0.0.0.0'
 class Sinatra::Application
   set :protection, :except => [:http_origin]
 
+  # Retourne la liste des langages disponibles sur la plateforme
+  # Return: Json Array
   get '/languages' do
     languages = JSON.parse(IO.read("config_languages.json"))
 
@@ -22,6 +24,9 @@ class Sinatra::Application
     json :languages => array
   end
 
+  # Executer un code.
+  # Params : code, langage
+  # Return: Json, stderr et stdout
   post '/execute' do
     json = params
 
