@@ -8,3 +8,4 @@ docker/
 \#*
 .\#*
 Gemfile.lock
+log/
