@@ -53,7 +53,7 @@ class Sinatra::Application
 
     File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"]))}
 
-    # pour limiter la taille mémoire d'un conteneur -m='128m' 
+    # pour limiter la taille memoire d'un conteneur -m='128m' 
     cmd = "docker run -rm=true -n=false -v /var/www/lips-compil/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} /root/timeout.sh  #{language["timeout"]}"
 
     stream_stdout, stream_stderr, exit_status = nil
@@ -66,7 +66,7 @@ class Sinatra::Application
       end
     end
 
-    system("rm -R tmp/#{id}")
+    #system("rm -R tmp/#{id}")
 
     return {"stdout" => stream_stdout.to_s, "stderr" => stream_stderr.to_s}.to_json
   end
