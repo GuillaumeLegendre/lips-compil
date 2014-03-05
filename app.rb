@@ -35,7 +35,7 @@ class Sinatra::Application
     end
 
     if (json["code"] =~ /\A[a-zA-Z\d\/+]+={,2}\z/).nil?
-      return {"stdout" => "", "stderr" => "Error: Variable code must be encode in base64"}.to_json
+      return {"stdout" => "", "stderr" => "Error: Variable code must be encoded in base64"}.to_json
     end
 
     language = JSON.parse(IO.read("config_languages.json"))["languages"][json["language"]]
@@ -54,7 +54,7 @@ class Sinatra::Application
     File.open("tmp/#{id}/code.#{language["extension"]}", 'wb') {|f| f.write(Base64.decode64(json["code"]))}
 
     # pour limiter la taille mémoire d'un conteneur -m='128m' 
-    cmd = "docker run -rm=true -n=false -v /var/www/lips-compil/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} /root/timeout.sh  #{language["timeout"]}"
+    cmd = "docker run -rm=true -n=false -v #{Dir.pwd}/tmp/#{id}:/compil/code:rw ubuntu:#{json["language"]} /root/timeout.sh  #{language["timeout"]}"
 
     stream_stdout, stream_stderr, exit_status = nil
     Open3.popen3(cmd) do |stdin, stdout, stderr, wait_thr|
